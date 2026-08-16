@@ -27,16 +27,16 @@ class UserModel {
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
     return UserModel(
-      id: (json["id"] ?? json["userId"]) as int,
-      username: (json["username"] ?? "") as String,
-      name: (json["name"] ?? "") as String, // Tambah fallback "" biar gak crash
-      role: (json["role"] ?? "") as String,
+      // /auth/login balikin `id`, /auth/me balikin isi token mentah yang field-nya `userId`.
+      // Ditampung dua-duanya biar model ini bisa dipakai buat parsing keduanya.
+      id: json["id"] ?? json["userId"],
+      username: json["username"] ?? "",
+      name: json["name"],
+      role: json["role"],
       phoneNumber: json["phoneNumber"] ?? json["phone_number"],
-      
-      // Ambil ID relasi: Cek dari JWT payload dulu, kalo gak ada baru intip dari object nested login!
-      studentId: json["studentId"] ?? json["student"]?["id"],
-      teacherId: json["teacherId"] ?? json["teacher"]?["id"],
-      parentId: json["parentId"] ?? json["parent"]?["id"],
+      studentId: json["studentId"],
+      teacherId: json["teacherId"],
+      parentId: json["parentId"],
     );
   }
 

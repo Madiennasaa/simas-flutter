@@ -2,6 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'core/constants/app_colors.dart';
 import 'providers/auth_provider.dart';
+import 'providers/academic_year_provider.dart';
+import 'providers/class_provider.dart';
+import 'providers/subject_provider.dart';
+import 'providers/teacher_provider.dart';
+import 'providers/student_provider.dart';
+import 'providers/class_subject_provider.dart';
+import 'providers/attendance_provider.dart';
 import 'views/auth/login_view.dart';
 import 'views/widgets/loading_indicator.dart';
 import 'views/admin/admin_dashboard_view.dart';
@@ -19,8 +26,17 @@ class SimasApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (_) => AuthProvider()..tryAutoLogin(),
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => AuthProvider()..tryAutoLogin()),
+        ChangeNotifierProvider(create: (_) => AcademicYearProvider()),
+        ChangeNotifierProvider(create: (_) => ClassProvider()),
+        ChangeNotifierProvider(create: (_) => SubjectProvider()),
+        ChangeNotifierProvider(create: (_) => TeacherProvider()),
+        ChangeNotifierProvider(create: (_) => StudentProvider()),
+        ChangeNotifierProvider(create: (_) => ClassSubjectProvider()),
+        ChangeNotifierProvider(create: (_) => AttendanceProvider()),
+      ],
       child: MaterialApp(
         title: "SIMAS",
         debugShowCheckedModeBanner: false,
