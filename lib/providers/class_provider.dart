@@ -30,14 +30,12 @@ class ClassProvider extends ChangeNotifier {
   Future<bool> create({
     required String className,
     required int gradeLevel,
-    required String phase,
     int? homeroomTeacherId,
   }) async {
     try {
       await _repository.create(
         className: className,
         gradeLevel: gradeLevel,
-        phase: phase,
         homeroomTeacherId: homeroomTeacherId,
       );
       await fetchAll();
@@ -49,10 +47,13 @@ class ClassProvider extends ChangeNotifier {
     }
   }
 
-  Future<bool> update(int id, {String? className, int? gradeLevel, String? phase, int? homeroomTeacherId}) async {
+  Future<bool> update(int id,
+      {String? className, int? gradeLevel, int? homeroomTeacherId}) async {
     try {
       await _repository.update(id,
-          className: className, gradeLevel: gradeLevel, phase: phase, homeroomTeacherId: homeroomTeacherId);
+          className: className,
+          gradeLevel: gradeLevel,
+          homeroomTeacherId: homeroomTeacherId);
       await fetchAll();
       return true;
     } catch (e) {

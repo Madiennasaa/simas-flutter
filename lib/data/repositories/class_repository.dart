@@ -12,21 +12,20 @@ class ClassRepository {
       final List data = res.data["data"];
       return data.map((e) => SchoolClassModel.fromJson(e)).toList();
     } on DioException catch (e) {
-      throw Exception(e.response?.data?["message"] ?? "Gagal mengambil data kelas");
+      throw Exception(
+          e.response?.data?["message"] ?? "Gagal mengambil data kelas");
     }
   }
 
   Future<SchoolClassModel> create({
     required String className,
     required int gradeLevel,
-    required String phase,
     int? homeroomTeacherId,
   }) async {
     try {
       final res = await _dio.post(ApiEndpoints.classes, data: {
         "className": className,
         "gradeLevel": gradeLevel,
-        "phase": phase,
         if (homeroomTeacherId != null) "homeroomTeacherId": homeroomTeacherId,
       });
       return SchoolClassModel.fromJson(res.data["data"]);
@@ -41,19 +40,18 @@ class ClassRepository {
     int id, {
     String? className,
     int? gradeLevel,
-    String? phase,
     int? homeroomTeacherId,
   }) async {
     try {
       final res = await _dio.put("${ApiEndpoints.classes}/$id", data: {
         if (className != null) "className": className,
         if (gradeLevel != null) "gradeLevel": gradeLevel,
-        if (phase != null) "phase": phase,
         if (homeroomTeacherId != null) "homeroomTeacherId": homeroomTeacherId,
       });
       return SchoolClassModel.fromJson(res.data["data"]);
     } on DioException catch (e) {
-      throw Exception(e.response?.data?["message"] ?? "Gagal memperbarui kelas");
+      throw Exception(
+          e.response?.data?["message"] ?? "Gagal memperbarui kelas");
     }
   }
 

@@ -2,7 +2,6 @@ class SchoolClassModel {
   final int id;
   final String className;
   final int gradeLevel;
-  final String phase; // 'A'..'F'
   final int? homeroomTeacherId;
   final String? homeroomTeacherName;
   final int studentCount;
@@ -11,7 +10,6 @@ class SchoolClassModel {
     required this.id,
     required this.className,
     required this.gradeLevel,
-    required this.phase,
     this.homeroomTeacherId,
     this.homeroomTeacherName,
     this.studentCount = 0,
@@ -22,7 +20,7 @@ class SchoolClassModel {
       id: json["id"],
       className: json["className"],
       gradeLevel: json["gradeLevel"],
-      phase: json["phase"],
+      // phase removed
       homeroomTeacherId: json["homeroomTeacherId"],
       homeroomTeacherName: json["homeroomTeacher"]?["user"]?["name"],
       studentCount: json["_count"]?["students"] ?? 0,
