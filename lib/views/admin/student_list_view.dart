@@ -132,7 +132,7 @@ class _StudentListViewState extends State<StudentListView> {
                       fontWeight: FontWeight.w600,
                       color: AppColors.textPrimary)),
               subtitle: Text(
-                "NISN: ${s.nisn}${s.className != null ? ' • Kelas ${s.className}' : ''}",
+                "NISN: ${s.nisn ?? '-'}${s.className != null ? ' • Kelas ${s.className}' : ''}",
                 style: const TextStyle(
                     fontSize: 12, color: AppColors.textSecondary),
               ),
@@ -237,7 +237,7 @@ class _StudentListViewState extends State<StudentListView> {
                   const SizedBox(height: 8),
                   TextFormField(
                       controller: nisnCtrl,
-                      decoration: const InputDecoration(labelText: 'NISN')),
+                      decoration: const InputDecoration(labelText: 'NISN (opsional kelas 1)')),
                   const SizedBox(height: 8),
                   TextFormField(
                       controller: phoneCtrl,
