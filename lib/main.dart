@@ -9,6 +9,11 @@ import 'providers/teacher_provider.dart';
 import 'providers/student_provider.dart';
 import 'providers/class_subject_provider.dart';
 import 'providers/attendance_provider.dart';
+import 'providers/schedule_provider.dart';
+import 'providers/material_provider.dart';
+import 'providers/assignment_provider.dart';
+import 'providers/announcement_provider.dart';
+import 'providers/grade_provider.dart';
 import 'views/auth/login_view.dart';
 import 'views/widgets/loading_indicator.dart';
 import 'views/admin/admin_dashboard_view.dart';
@@ -36,6 +41,11 @@ class SimasApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => StudentProvider()),
         ChangeNotifierProvider(create: (_) => ClassSubjectProvider()),
         ChangeNotifierProvider(create: (_) => AttendanceProvider()),
+        ChangeNotifierProvider(create: (_) => ScheduleProvider()),
+        ChangeNotifierProvider(create: (_) => MaterialProvider()),
+        ChangeNotifierProvider(create: (_) => AssignmentProvider()),
+        ChangeNotifierProvider(create: (_) => AnnouncementProvider()),
+        ChangeNotifierProvider(create: (_) => GradeProvider()),
       ],
       child: MaterialApp(
         title: "SIMAS",
