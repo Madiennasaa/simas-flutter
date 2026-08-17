@@ -4,6 +4,7 @@ import '../../core/constants/app_colors.dart';
 import '../../providers/student_provider.dart';
 import '../../providers/class_provider.dart';
 import '../../data/models/student_model.dart';
+import '../../data/models/school_class_model.dart';
 import '../widgets/loading_indicator.dart';
 
 class StudentListView extends StatefulWidget {
@@ -157,6 +158,7 @@ class _StudentListViewState extends State<StudentListView> {
                     );
                     if (confirmed == true) {
                       final ok = await provider.remove(s.id);
+                      if (!context.mounted) return;
                       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                         content: Text(ok
                             ? 'Siswa dihapus'
@@ -268,50 +270,121 @@ class _StudentListViewState extends State<StudentListView> {
                               ? null
                               : phoneCtrl.text.trim();
                           final classId = selectedClassId;
+
                           if (!isEdit) {
+                            // Determine selected class grade level
+                            SchoolClassModel? selectedClass;
+                            try {
+                              selectedClass = classProvider.classes
+                                  .firstWhere((c) => c.id == classId);
+                            } catch (_) {
+                              selectedClass = null;
+                            }
+                            final isGrade1 = selectedClass != null &&
+                                selectedClass.gradeLevel == 1;
+
                             if (username.isEmpty ||
                                 password.isEmpty ||
                                 name.isEmpty ||
-                                nisn.isEmpty ||
                                 classId == null) {
                               ScaffoldMessenger.of(context).showSnackBar(
                                   const SnackBar(
                                       content: Text(
-                                          'Semua field wajib kecuali No. HP')));
+                                          'Nama, Username, Password, dan Kelas wajib diisi')));
                               return;
                             }
+
+                            if (!isGrade1 && nisn.isEmpty) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                      content: Text(
+                                          'NISN wajib diisi untuk siswa kelas 2 ke atas')));
+                              return;
+                            }
+
+                            final nisnVal = nisn.isEmpty ? null : nisn;
                             final ok = await provider.create(
                                 username: username,
                                 password: password,
                                 name: name,
-                                nisn: nisn,
+                                nisn: nisnVal,
                                 classId: classId,
                                 phoneNumber: phone);
-                            Navigator.pop(ctx);
-                            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                                content: Text(ok
-                                    ? 'Siswa dibuat'
-                                    : (provider.errorMessage ?? 'Gagal'))));
+
+                            if (!ctx.mounted) return;
+
+                            if (ok) {
+                              // 🟢 KALAU SUKSES: Tutup modal & tampilkan toast hijau
+                              Navigator.pop(ctx);
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text('Siswa berhasil dibuat'),
+                                  backgroundColor: Colors.green,
+                                ),
+                              );
+                            } else {
+                              // 🔴 KALAU GAGAL: JANGAN POP MODAL! Tampilkan snackbar error
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(provider.errorMessage ?? 'Gagal membuat siswa'),
+                                  backgroundColor: Colors.red,
+                                ),
+                              );
+                            }
                           } else {
-                            if (name.isEmpty ||
-                                nisn.isEmpty ||
-                                classId == null) {
+                            SchoolClassModel? selectedClass;
+                            try {
+                              selectedClass = classProvider.classes
+                                  .firstWhere((c) => c.id == classId);
+                            } catch (_) {
+                              selectedClass = null;
+                            }
+                            final isGrade1 = selectedClass != null &&
+                                selectedClass.gradeLevel == 1;
+
+                            if (name.isEmpty || classId == null) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                      content:
+                                          Text('Nama dan Kelas wajib diisi')));
+                              return;
+                            }
+
+                            if (!isGrade1 && nisn.isEmpty) {
                               ScaffoldMessenger.of(context).showSnackBar(
                                   const SnackBar(
                                       content: Text(
-                                          'Nama, NISN, dan kelas wajib diisi')));
+                                          'NISN wajib diisi untuk siswa kelas 2 ke atas')));
                               return;
                             }
-                            final ok = await provider.update(existing!.id,
+
+                            final nisnVal = nisn.isEmpty ? null : nisn;
+                            final ok = await provider.update(existing.id,
                                 name: name,
-                                nisn: nisn,
+                                nisn: nisnVal,
                                 phoneNumber: phone,
                                 classId: classId);
-                            Navigator.pop(ctx);
-                            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                                content: Text(ok
-                                    ? 'Siswa diperbarui'
-                                    : (provider.errorMessage ?? 'Gagal'))));
+
+                            if (!ctx.mounted) return;
+
+                            if (ok) {
+                              // 🟢 KALAU SUKSES UPDATE: Tutup modal & tampilkan toast hijau
+                              Navigator.pop(ctx);
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text('Siswa diperbarui'),
+                                  backgroundColor: Colors.green,
+                                ),
+                              );
+                            } else {
+                              // 🔴 KALAU GAGAL UPDATE: JANGAN POP MODAL! Tampilkan snackbar error
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(provider.errorMessage ?? 'Gagal memperbarui siswa'),
+                                  backgroundColor: Colors.red,
+                                ),
+                              );
+                            }
                           }
                         },
                         child: Text(isEdit ? 'Simpan' : 'Buat'),

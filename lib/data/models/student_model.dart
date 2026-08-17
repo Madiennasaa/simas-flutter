@@ -4,7 +4,7 @@ class StudentModel {
   final String name;
   final String username;
   final String? phoneNumber;
-  final String nisn;
+  final String? nisn;
   final int classId;
   final String? className;
 

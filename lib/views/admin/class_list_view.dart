@@ -121,6 +121,7 @@ class _ClassListViewState extends State<ClassListView> {
                     );
                     if (confirmed == true) {
                       final ok = await provider.remove(c.id);
+                      if (!context.mounted) return;
                       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                         content: Text(ok
                             ? 'Kelas dihapus'
@@ -229,7 +230,7 @@ class _ClassListViewState extends State<ClassListView> {
                             }
                             bool ok = false;
                             if (isEdit) {
-                              ok = await provider.update(existing!.id,
+                              ok = await provider.update(existing.id,
                                   className: name,
                                   gradeLevel: grade,
                                   homeroomTeacherId: selectedTeacherId);
@@ -239,8 +240,9 @@ class _ClassListViewState extends State<ClassListView> {
                                   gradeLevel: grade,
                                   homeroomTeacherId: selectedTeacherId);
                             }
+                            if (!ctx.mounted) return;
                             Navigator.pop(ctx);
-                            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                            ScaffoldMessenger.of(ctx).showSnackBar(SnackBar(
                                 content: Text(ok
                                     ? (isEdit
                                         ? 'Kelas diperbarui'

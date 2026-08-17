@@ -15,7 +15,8 @@ class StudentRepository {
       final List data = res.data["data"];
       return data.map((e) => StudentModel.fromJson(e)).toList();
     } on DioException catch (e) {
-      throw Exception(e.response?.data?["message"] ?? "Gagal mengambil data siswa");
+      throw Exception(
+          e.response?.data?["message"] ?? "Gagal mengambil data siswa");
     }
   }
 
@@ -23,7 +24,7 @@ class StudentRepository {
     required String username,
     required String password,
     required String name,
-    required String nisn,
+    String? nisn,
     required int classId,
     String? phoneNumber,
   }) async {
@@ -32,17 +33,19 @@ class StudentRepository {
         "username": username,
         "password": password,
         "name": name,
-        "nisn": nisn,
+        if (nisn != null) "nisn": nisn,
         "classId": classId,
         if (phoneNumber != null) "phoneNumber": phoneNumber,
       });
       return StudentModel.fromJson(res.data["data"]);
     } on DioException catch (e) {
-      throw Exception(e.response?.data?["message"] ?? "Gagal menambahkan siswa");
+      throw Exception(
+          e.response?.data?["message"] ?? "Gagal menambahkan siswa");
     }
   }
 
-  Future<StudentModel> update(int id, {String? name, String? phoneNumber, String? nisn, int? classId}) async {
+  Future<StudentModel> update(int id,
+      {String? name, String? phoneNumber, String? nisn, int? classId}) async {
     try {
       final res = await _dio.put("${ApiEndpoints.students}/$id", data: {
         if (name != null) "name": name,
@@ -52,7 +55,8 @@ class StudentRepository {
       });
       return StudentModel.fromJson(res.data["data"]);
     } on DioException catch (e) {
-      throw Exception(e.response?.data?["message"] ?? "Gagal memperbarui data siswa");
+      throw Exception(
+          e.response?.data?["message"] ?? "Gagal memperbarui data siswa");
     }
   }
 
