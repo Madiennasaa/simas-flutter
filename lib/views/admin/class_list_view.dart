@@ -157,7 +157,6 @@ class _ClassListViewState extends State<ClassListView> {
         final tProvider = context.read<TeacherProvider>();
         if (tProvider.teachers.isEmpty && !tProvider.isLoading)
           tProvider.fetchAll();
-
         return Padding(
           padding:
               EdgeInsets.only(bottom: MediaQuery.of(ctx).viewInsets.bottom),

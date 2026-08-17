@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../../core/constants/app_colors.dart';
 import '../../providers/student_provider.dart';
 import '../../providers/class_provider.dart';
+import '../../data/models/student_model.dart';
 import '../widgets/loading_indicator.dart';
 
 class StudentListView extends StatefulWidget {
@@ -44,6 +45,11 @@ class _StudentListViewState extends State<StudentListView> {
         backgroundColor: AppColors.primary,
         foregroundColor: Colors.white,
       ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => _openStudentForm(context, provider: studentProvider),
+        backgroundColor: AppColors.primary,
+        child: const Icon(Icons.add),
+      ),
       body: Column(
         children: [
           Padding(
@@ -53,12 +59,15 @@ class _StudentListViewState extends State<StudentListView> {
               decoration: const InputDecoration(
                 labelText: "Filter berdasarkan kelas",
                 border: OutlineInputBorder(),
-                contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                contentPadding:
+                    EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               ),
               items: [
-                const DropdownMenuItem<int?>(value: null, child: Text("Semua kelas")),
+                const DropdownMenuItem<int?>(
+                    value: null, child: Text("Semua kelas")),
                 ...classProvider.classes.map(
-                  (c) => DropdownMenuItem<int?>(value: c.id, child: Text("Kelas ${c.className}")),
+                  (c) => DropdownMenuItem<int?>(
+                      value: c.id, child: Text("Kelas ${c.className}")),
                 ),
               ],
               onChanged: _onClassFilterChanged,
@@ -79,17 +88,21 @@ class _StudentListViewState extends State<StudentListView> {
       return Center(
         child: Padding(
           padding: const EdgeInsets.all(24),
-          child: Text(provider.errorMessage!, style: const TextStyle(color: AppColors.error)),
+          child: Text(provider.errorMessage!,
+              style: const TextStyle(color: AppColors.error)),
         ),
       );
     }
 
     if (provider.students.isEmpty) {
-      return const Center(child: Text("Belum ada siswa", style: TextStyle(color: AppColors.textSecondary)));
+      return const Center(
+          child: Text("Belum ada siswa",
+              style: TextStyle(color: AppColors.textSecondary)));
     }
 
     return RefreshIndicator(
-      onRefresh: () => context.read<StudentProvider>().fetchAll(classId: _selectedClassId),
+      onRefresh: () =>
+          context.read<StudentProvider>().fetchAll(classId: _selectedClassId),
       child: ListView.separated(
         padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
         itemCount: provider.students.length,
@@ -103,23 +116,214 @@ class _StudentListViewState extends State<StudentListView> {
               side: BorderSide(color: Colors.grey.shade200),
             ),
             child: ListTile(
-              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              contentPadding:
+                  const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               leading: CircleAvatar(
                 backgroundColor: AppColors.secondary.withOpacity(0.1),
                 child: Text(
                   s.name.isNotEmpty ? s.name[0].toUpperCase() : "?",
-                  style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.secondary),
+                  style: const TextStyle(
+                      fontWeight: FontWeight.bold, color: AppColors.secondary),
                 ),
               ),
-              title: Text(s.name, style: const TextStyle(fontWeight: FontWeight.w600, color: AppColors.textPrimary)),
+              title: Text(s.name,
+                  style: const TextStyle(
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.textPrimary)),
               subtitle: Text(
                 "NISN: ${s.nisn}${s.className != null ? ' • Kelas ${s.className}' : ''}",
-                style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                style: const TextStyle(
+                    fontSize: 12, color: AppColors.textSecondary),
+              ),
+              trailing: PopupMenuButton<String>(
+                onSelected: (v) async {
+                  if (v == 'edit') {
+                    _openStudentForm(context, provider: provider, existing: s);
+                  } else if (v == 'delete') {
+                    final confirmed = await showDialog<bool>(
+                      context: context,
+                      builder: (_) => AlertDialog(
+                        title: const Text('Konfirmasi'),
+                        content: const Text('Yakin ingin menghapus siswa ini?'),
+                        actions: [
+                          TextButton(
+                              onPressed: () => Navigator.pop(context, false),
+                              child: const Text('Batal')),
+                          TextButton(
+                              onPressed: () => Navigator.pop(context, true),
+                              child: const Text('Hapus')),
+                        ],
+                      ),
+                    );
+                    if (confirmed == true) {
+                      final ok = await provider.remove(s.id);
+                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                        content: Text(ok
+                            ? 'Siswa dihapus'
+                            : (provider.errorMessage ?? 'Gagal menghapus')),
+                      ));
+                    }
+                  }
+                },
+                itemBuilder: (_) => const [
+                  PopupMenuItem(value: 'edit', child: Text('Edit')),
+                  PopupMenuItem(value: 'delete', child: Text('Hapus')),
+                ],
               ),
             ),
           );
         },
       ),
+    );
+  }
+
+  void _openStudentForm(BuildContext context,
+      {required StudentProvider provider, StudentModel? existing}) {
+    final isEdit = existing != null;
+    final usernameCtrl = TextEditingController(text: existing?.username ?? '');
+    final passwordCtrl = TextEditingController();
+    final nameCtrl = TextEditingController(text: existing?.name ?? '');
+    final nisnCtrl = TextEditingController(text: existing?.nisn ?? '');
+    final phoneCtrl = TextEditingController(text: existing?.phoneNumber ?? '');
+    int? selectedClassId = existing?.classId ?? _selectedClassId;
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (ctx) {
+        final classProvider = context.read<ClassProvider>();
+        if (classProvider.classes.isEmpty && !classProvider.isLoading)
+          classProvider.fetchAll();
+
+        return Padding(
+          padding:
+              EdgeInsets.only(bottom: MediaQuery.of(ctx).viewInsets.bottom),
+          child: StatefulBuilder(builder: (context, setState) {
+            return Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Row(
+                    children: [
+                      Text(isEdit ? 'Edit Siswa' : 'Tambah Siswa',
+                          style: const TextStyle(
+                              fontSize: 16, fontWeight: FontWeight.bold)),
+                      const Spacer(),
+                      IconButton(
+                          onPressed: () => Navigator.pop(ctx),
+                          icon: const Icon(Icons.close)),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  if (!isEdit) ...[
+                    TextFormField(
+                        controller: usernameCtrl,
+                        decoration:
+                            const InputDecoration(labelText: 'Username')),
+                    const SizedBox(height: 8),
+                    TextFormField(
+                        controller: passwordCtrl,
+                        obscureText: true,
+                        decoration:
+                            const InputDecoration(labelText: 'Password')),
+                    const SizedBox(height: 8),
+                  ],
+                  TextFormField(
+                      controller: nameCtrl,
+                      decoration: const InputDecoration(labelText: 'Nama')),
+                  const SizedBox(height: 8),
+                  TextFormField(
+                      controller: nisnCtrl,
+                      decoration: const InputDecoration(labelText: 'NISN')),
+                  const SizedBox(height: 8),
+                  TextFormField(
+                      controller: phoneCtrl,
+                      decoration: const InputDecoration(
+                          labelText: 'No. HP (opsional)')),
+                  const SizedBox(height: 8),
+                  Consumer<ClassProvider>(builder: (context, cp, __) {
+                    if (cp.isLoading) return const LinearProgressIndicator();
+                    return DropdownButtonFormField<int>(
+                      value: selectedClassId,
+                      decoration:
+                          const InputDecoration(labelText: 'Pilih Kelas'),
+                      items: cp.classes
+                          .map((c) => DropdownMenuItem(
+                              value: c.id, child: Text('Kelas ${c.className}')))
+                          .toList(),
+                      onChanged: (v) => setState(() => selectedClassId = v),
+                    );
+                  }),
+                  const SizedBox(height: 16),
+                  Row(children: [
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: () async {
+                          final username = usernameCtrl.text.trim();
+                          final password = passwordCtrl.text;
+                          final name = nameCtrl.text.trim();
+                          final nisn = nisnCtrl.text.trim();
+                          final phone = phoneCtrl.text.trim().isEmpty
+                              ? null
+                              : phoneCtrl.text.trim();
+                          final classId = selectedClassId;
+                          if (!isEdit) {
+                            if (username.isEmpty ||
+                                password.isEmpty ||
+                                name.isEmpty ||
+                                nisn.isEmpty ||
+                                classId == null) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                      content: Text(
+                                          'Semua field wajib kecuali No. HP')));
+                              return;
+                            }
+                            final ok = await provider.create(
+                                username: username,
+                                password: password,
+                                name: name,
+                                nisn: nisn,
+                                classId: classId,
+                                phoneNumber: phone);
+                            Navigator.pop(ctx);
+                            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                                content: Text(ok
+                                    ? 'Siswa dibuat'
+                                    : (provider.errorMessage ?? 'Gagal'))));
+                          } else {
+                            if (name.isEmpty ||
+                                nisn.isEmpty ||
+                                classId == null) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                      content: Text(
+                                          'Nama, NISN, dan kelas wajib diisi')));
+                              return;
+                            }
+                            final ok = await provider.update(existing!.id,
+                                name: name,
+                                nisn: nisn,
+                                phoneNumber: phone,
+                                classId: classId);
+                            Navigator.pop(ctx);
+                            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                                content: Text(ok
+                                    ? 'Siswa diperbarui'
+                                    : (provider.errorMessage ?? 'Gagal'))));
+                          }
+                        },
+                        child: Text(isEdit ? 'Simpan' : 'Buat'),
+                      ),
+                    ),
+                  ])
+                ],
+              ),
+            );
+          }),
+        );
+      },
     );
   }
 }
