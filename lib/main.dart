@@ -21,6 +21,7 @@ import 'views/teacher/teacher_dashboard_view.dart';
 import 'views/student/student_dashboard_view.dart';
 import 'views/parent/parent_dashboard_view.dart';
 import 'views/headmaster/headmaster_dashboard_view.dart';
+import 'views/splash/splash_view.dart';
 
 void main() {
   runApp(const SimasApp());
@@ -56,7 +57,7 @@ class SimasApp extends StatelessWidget {
           colorScheme: ColorScheme.fromSeed(seedColor: AppColors.primary),
           useMaterial3: true,
         ),
-        home: const _RootRouter(),
+        home: const SplashView(),
       ),
     );
   }
@@ -65,8 +66,8 @@ class SimasApp extends StatelessWidget {
 /// Nentuin halaman pertama yang dilihat user berdasarkan status auth:
 /// masih ngecek token -> loading, belum login -> LoginView,
 /// udah login -> langsung ke dashboard sesuai role (skip halaman login).
-class _RootRouter extends StatelessWidget {
-  const _RootRouter();
+class RootRouter extends StatelessWidget {
+  const RootRouter({super.key});
 
   @override
   Widget build(BuildContext context) {
