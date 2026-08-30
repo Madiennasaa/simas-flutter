@@ -32,44 +32,50 @@ class AdminDashboardView extends StatelessWidget {
       _MenuItemData(
         icon: Icons.class_outlined,
         label: "Kelas",
-        color: AppColors.primary,
+        color: AppColors.accentGreen,
         isReady: true,
-        onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const ClassListView())),
+        onTap: () => Navigator.of(context)
+            .push(MaterialPageRoute(builder: (_) => const ClassListView())),
       ),
       _MenuItemData(
         icon: Icons.people_outline,
         label: "Siswa",
-        color: AppColors.secondary,
+        color: const Color(0xFF5B8DEF),
         isReady: true,
-        onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const StudentListView())),
+        onTap: () => Navigator.of(context)
+            .push(MaterialPageRoute(builder: (_) => const StudentListView())),
       ),
       _MenuItemData(
         icon: Icons.person_outline,
         label: "Guru",
-        color: AppColors.warning,
+        color: const Color(0xFFF5A623),
         isReady: true,
-        onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const TeacherListView())),
+        onTap: () => Navigator.of(context)
+            .push(MaterialPageRoute(builder: (_) => const TeacherListView())),
       ),
       _MenuItemData(
         icon: Icons.book_outlined,
         label: "Mata Pelajaran",
-        color: AppColors.error,
+        color: const Color(0xFFEF6C6C),
         isReady: true,
-        onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const SubjectListView())),
+        onTap: () => Navigator.of(context)
+            .push(MaterialPageRoute(builder: (_) => const SubjectListView())),
       ),
       _MenuItemData(
         icon: Icons.calendar_today_outlined,
         label: "Tahun Ajaran",
-        color: Colors.purple,
+        color: const Color(0xFFA78BFA),
         isReady: true,
-        onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const AcademicYearListView())),
+        onTap: () => Navigator.of(context).push(
+            MaterialPageRoute(builder: (_) => const AcademicYearListView())),
       ),
       _MenuItemData(
         icon: Icons.campaign_outlined,
         label: "Pengumuman",
-        color: Colors.teal,
+        color: const Color(0xFF4FBDBA),
         isReady: true,
-        onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const AnnouncementListView())),
+        onTap: () => Navigator.of(context).push(
+            MaterialPageRoute(builder: (_) => const AnnouncementListView())),
       ),
     ];
 
@@ -77,33 +83,91 @@ class AdminDashboardView extends StatelessWidget {
       backgroundColor: AppColors.background,
       appBar: AppBar(
         title: const Text("Dashboard Admin"),
-        backgroundColor: AppColors.primary,
-        foregroundColor: Colors.white,
+        backgroundColor: AppColors.surface,
+        foregroundColor: AppColors.textPrimary,
+        elevation: 0,
+        surfaceTintColor: Colors.transparent,
+        titleTextStyle: const TextStyle(
+          color: AppColors.textPrimary,
+          fontSize: 18,
+          fontWeight: FontWeight.w700,
+        ),
         actions: [
-          IconButton(icon: const Icon(Icons.logout), onPressed: () => _handleLogout(context)),
+          IconButton(
+            icon: const Icon(Icons.logout_rounded,
+                color: AppColors.textSecondary),
+            onPressed: () => _handleLogout(context),
+          ),
         ],
       ),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Padding(
-            padding: const EdgeInsets.all(16),
-            child: Text(
-              "Selamat datang, ${user?.name ?? ''}",
-              style: const TextStyle(fontSize: 16, color: AppColors.textSecondary),
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+            child: Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(18),
+              decoration: BoxDecoration(
+                color: AppColors.accentGreen,
+                borderRadius: BorderRadius.circular(20),
+                boxShadow: [
+                  BoxShadow(
+                    color: AppColors.accentGreen.withOpacity(0.30),
+                    offset: const Offset(0, 8),
+                    blurRadius: 18,
+                  ),
+                ],
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: const BoxDecoration(
+                      color: Colors.white24,
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(Icons.admin_panel_settings_outlined,
+                        color: Colors.white, size: 24),
+                  ),
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          "Selamat datang,",
+                          style: TextStyle(
+                              fontSize: 12.5,
+                              color: Colors.white.withOpacity(0.85)),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          user?.name ?? '',
+                          style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w700,
+                              color: Colors.white),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
           Expanded(
             child: GridView.builder(
-              padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 2,
-                mainAxisSpacing: 12,
-                crossAxisSpacing: 12,
+                mainAxisSpacing: 14,
+                crossAxisSpacing: 14,
                 childAspectRatio: 1.3,
               ),
               itemCount: menuItems.length,
-              itemBuilder: (context, index) => _MenuTile(data: menuItems[index]),
+              itemBuilder: (context, index) =>
+                  _MenuTile(data: menuItems[index]),
             ),
           ),
         ],
@@ -119,7 +183,12 @@ class _MenuItemData {
   final bool isReady;
   final VoidCallback? onTap;
 
-  _MenuItemData({required this.icon, required this.label, required this.color, required this.isReady, this.onTap});
+  _MenuItemData(
+      {required this.icon,
+      required this.label,
+      required this.color,
+      required this.isReady,
+      this.onTap});
 }
 
 class _MenuTile extends StatelessWidget {
@@ -130,10 +199,10 @@ class _MenuTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: Colors.white,
-      borderRadius: BorderRadius.circular(16),
+      color: AppColors.surface,
+      borderRadius: BorderRadius.circular(18),
       child: InkWell(
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(18),
         onTap: data.isReady
             ? data.onTap
             : () => ScaffoldMessenger.of(context).showSnackBar(
@@ -141,27 +210,46 @@ class _MenuTile extends StatelessWidget {
                 ),
         child: Container(
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: Colors.grey.shade200),
+            borderRadius: BorderRadius.circular(18),
+            boxShadow: [
+              BoxShadow(
+                color: AppColors.textPrimary.withOpacity(0.05),
+                offset: const Offset(0, 4),
+                blurRadius: 12,
+              ),
+            ],
           ),
           padding: const EdgeInsets.all(16),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(data.icon, size: 32, color: data.isReady ? data.color : Colors.grey.shade400),
-              const SizedBox(height: 8),
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: (data.isReady ? data.color : AppColors.inactiveGrey)
+                      .withOpacity(0.12),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(data.icon,
+                    size: 26,
+                    color: data.isReady ? data.color : AppColors.inactiveGrey),
+              ),
+              const SizedBox(height: 10),
               Text(
                 data.label,
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.w600,
-                  color: data.isReady ? AppColors.textPrimary : Colors.grey.shade400,
+                  color: data.isReady
+                      ? AppColors.textPrimary
+                      : AppColors.textMuted,
                 ),
               ),
               if (!data.isReady) ...[
                 const SizedBox(height: 2),
-                Text("Segera hadir", style: TextStyle(fontSize: 10, color: Colors.grey.shade400)),
+                Text("Segera hadir",
+                    style: TextStyle(fontSize: 10, color: AppColors.textMuted)),
               ],
             ],
           ),
