@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'core/config/app_env.dart';
 import 'core/constants/app_colors.dart';
 import 'providers/auth_provider.dart';
 import 'providers/academic_year_provider.dart';
@@ -49,7 +50,7 @@ class SimasApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => GradeProvider()),
       ],
       child: MaterialApp(
-        title: "SIMAS",
+        title: AppEnv.isProduction ? "SIMAS" : "SIMAS (${AppEnv.label})",
         debugShowCheckedModeBanner: false,
         theme: ThemeData(
           primaryColor: AppColors.primary,
@@ -57,7 +58,16 @@ class SimasApp extends StatelessWidget {
           colorScheme: ColorScheme.fromSeed(seedColor: AppColors.primary),
           useMaterial3: true,
         ),
-        home: const SplashView(),
+        // Ribbon kecil "STAGING" di pojok biar gampang bedain dari build
+        // production waktu install dua-duanya sekaligus di HP buat debug.
+        home: AppEnv.isProduction
+            ? const SplashView()
+            : Banner(
+                message: AppEnv.label,
+                location: BannerLocation.topEnd,
+                color: Colors.orange,
+                child: const SplashView(),
+              ),
       ),
     );
   }
