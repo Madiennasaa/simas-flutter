@@ -13,13 +13,20 @@ class ClassSubjectProvider extends ChangeNotifier {
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
 
-  /// Kalau dipanggil dari akun guru, backend otomatis filter cuma penugasan dia.
-  Future<void> fetchAll({int? classId, int? academicYearId}) async {
+  /// Kalau dipanggil dari akun guru, backend otomatis filter cuma penugasan
+  /// dia. teacherId dipakai buat admin/headmaster yang mau filter manual
+  /// (mis. lihat penugasan guru tertentu dari halaman Guru).
+  Future<void> fetchAll(
+      {int? classId, int? academicYearId, int? teacherId}) async {
     _isLoading = true;
     _errorMessage = null;
     notifyListeners();
     try {
-      _classSubjects = await _repository.getAll(classId: classId, academicYearId: academicYearId);
+      _classSubjects = await _repository.getAll(
+        classId: classId,
+        academicYearId: academicYearId,
+        teacherId: teacherId,
+      );
     } catch (e) {
       _errorMessage = e.toString().replaceFirst("Exception: ", "");
     } finally {

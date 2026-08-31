@@ -4,6 +4,7 @@ import '../../core/constants/app_colors.dart';
 import '../../providers/teacher_provider.dart';
 import '../../data/models/teacher_model.dart';
 import '../widgets/loading_indicator.dart';
+import 'class_subject_list_view.dart';
 
 class TeacherListView extends StatefulWidget {
   const TeacherListView({super.key});
@@ -96,7 +97,12 @@ class _TeacherListViewState extends State<TeacherListView> {
               ),
               trailing: PopupMenuButton<String>(
                 onSelected: (v) async {
-                  if (v == 'edit') {
+                  if (v == 'assign') {
+                    Navigator.of(context).push(MaterialPageRoute(
+                      builder: (_) => ClassSubjectListView(
+                          filterTeacherId: t.id, filterTeacherName: t.name),
+                    ));
+                  } else if (v == 'edit') {
                     _openTeacherForm(context, provider: provider, existing: t);
                   } else if (v == 'delete') {
                     final confirmed = await showDialog<bool>(
@@ -126,6 +132,8 @@ class _TeacherListViewState extends State<TeacherListView> {
                   }
                 },
                 itemBuilder: (_) => const [
+                  PopupMenuItem(
+                      value: 'assign', child: Text('Kelola Penugasan')),
                   PopupMenuItem(value: 'edit', child: Text('Edit')),
                   PopupMenuItem(value: 'delete', child: Text('Hapus')),
                 ],

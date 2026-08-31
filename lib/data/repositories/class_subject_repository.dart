@@ -6,18 +6,22 @@ import '../models/class_subject_model.dart';
 class ClassSubjectRepository {
   final _dio = ApiClient.instance.dio;
 
-  /// Kalau login sebagai guru, backend otomatis filter cuma penugasan dia sendiri
-  /// (gak perlu kirim teacherId manual dari sini).
-  Future<List<ClassSubjectModel>> getAll({int? classId, int? academicYearId}) async {
+  /// Kalau login sebagai guru, backend otomatis filter cuma penugasan dia
+  /// sendiri (gak perlu kirim teacherId manual dari sini). teacherId di sini
+  /// dipakai buat admin/headmaster yang mau lihat penugasan guru tertentu.
+  Future<List<ClassSubjectModel>> getAll(
+      {int? classId, int? academicYearId, int? teacherId}) async {
     try {
       final res = await _dio.get(ApiEndpoints.classSubjects, queryParameters: {
         if (classId != null) "classId": classId,
         if (academicYearId != null) "academicYearId": academicYearId,
+        if (teacherId != null) "teacherId": teacherId,
       });
       final List data = res.data["data"];
       return data.map((e) => ClassSubjectModel.fromJson(e)).toList();
     } on DioException catch (e) {
-      throw Exception(e.response?.data?["message"] ?? "Gagal mengambil data penugasan");
+      throw Exception(
+          e.response?.data?["message"] ?? "Gagal mengambil data penugasan");
     }
   }
 
@@ -36,7 +40,8 @@ class ClassSubjectRepository {
       });
       return ClassSubjectModel.fromJson(res.data["data"]);
     } on DioException catch (e) {
-      throw Exception(e.response?.data?["message"] ?? "Gagal membuat penugasan guru");
+      throw Exception(
+          e.response?.data?["message"] ?? "Gagal membuat penugasan guru");
     }
   }
 
@@ -44,7 +49,8 @@ class ClassSubjectRepository {
     try {
       await _dio.delete("${ApiEndpoints.classSubjects}/$id");
     } on DioException catch (e) {
-      throw Exception(e.response?.data?["message"] ?? "Gagal menghapus penugasan");
+      throw Exception(
+          e.response?.data?["message"] ?? "Gagal menghapus penugasan");
     }
   }
 }
