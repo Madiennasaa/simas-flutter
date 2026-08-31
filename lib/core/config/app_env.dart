@@ -22,7 +22,7 @@ class AppEnv {
   /// kamu di GitHub/hosting (mis. subdomain terpisah untuk staging).
   static const String _stagingApiUrl = String.fromEnvironment(
     'API_BASE_URL_STAGING',
-    defaultValue: 'https://simasapistaging1-tngrjr39.b4a.run/api',
+    defaultValue: 'https://simasapistaging1-lavr0tj0.b4a.run/api',
   );
 
   static const String _productionApiUrl = String.fromEnvironment(
