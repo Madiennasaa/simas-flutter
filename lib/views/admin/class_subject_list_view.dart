@@ -39,13 +39,11 @@ class _ClassSubjectListViewState extends State<ClassSubjectListView> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       final ayProvider = context.read<AcademicYearProvider>();
-      if (ayProvider.academicYears.isEmpty) {
+      if (ayProvider.years.isEmpty) {
         await ayProvider.fetchAll();
       }
       // Default filter ke tahun ajaran yang lagi aktif, biar relevan.
-      final active = ayProvider.academicYears.where((y) => y.isActive).toList();
-      setState(() =>
-          _filterAcademicYearId = active.isNotEmpty ? active.first.id : null);
+      setState(() => _filterAcademicYearId = ayProvider.active?.id);
       _fetch();
 
       // Data pendukung buat form (kelas, mapel, guru).
@@ -85,7 +83,7 @@ class _ClassSubjectListViewState extends State<ClassSubjectListView> {
                 isDense: true,
                 border: OutlineInputBorder(),
               ),
-              items: ayProvider.academicYears
+              items: ayProvider.years
                   .map((y) =>
                       DropdownMenuItem(value: y.id, child: Text(y.label)))
                   .toList(),
@@ -233,7 +231,7 @@ class _ClassSubjectListViewState extends State<ClassSubjectListView> {
                         value: selectedAcademicYearId,
                         decoration:
                             const InputDecoration(labelText: 'Tahun Ajaran'),
-                        items: ayp.academicYears
+                        items: ayp.years
                             .map((y) => DropdownMenuItem(
                                 value: y.id, child: Text(y.label)))
                             .toList(),
