@@ -1,0 +1,52 @@
+name: Staging Build
+
+on:
+  push:
+    branches:
+      - develop
+      - staging
+
+# Biar workflow boleh bikin Release (butuh izin tulis ke repo)
+permissions:
+  contents: write
+
+jobs:
+  build-staging:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.47.1' # sesuaikan dengan versi Flutter project kamu
+          channel: 'stable'
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Build APK (staging)
+        run: |
+          flutter build apk --release \
+            --dart-define=ENV=staging \
+            --dart-define=API_BASE_URL_STAGING=${{ secrets.API_BASE_URL_STAGING }}
+
+      - name: Rename APK biar gampang dikenali
+        run: cp build/app/outputs/flutter-apk/app-release.apk build/app/outputs/flutter-apk/simas-staging.apk
+
+      # Bikin/replace satu Release tetap bernama "staging-latest" tiap push,
+      # APK-nya ke-attach sebagai asset. Muncul di tab Releases repo, dan
+      # kalau kamu "Watch" repo ini di app GitHub, ada notifikasi tiap kali
+      # release baru terbit — tinggal tap notif, download APK, install.
+      - name: Publish ke GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: staging-latest
+          name: "Staging Build - ${{ github.sha }}"
+          body: |
+            Build otomatis dari commit `${{ github.sha }}`
+            ${{ github.event.head_commit.message }}
+          prerelease: true
+          files: build/app/outputs/flutter-apk/simas-staging.apk
