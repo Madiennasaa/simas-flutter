@@ -43,13 +43,15 @@ class _StudentListViewState extends State<StudentListView> {
       backgroundColor: AppColors.background,
       appBar: AppBar(
         title: const Text("Daftar Siswa"),
-        backgroundColor: AppColors.primary,
-        foregroundColor: Colors.white,
+        backgroundColor: AppColors.surface,
+        foregroundColor: AppColors.textPrimary,
+        elevation: 0,
+        surfaceTintColor: Colors.transparent,
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => _openStudentForm(context, provider: studentProvider),
-        backgroundColor: AppColors.primary,
-        child: const Icon(Icons.add),
+        backgroundColor: AppColors.accentGreen,
+        child: const Icon(Icons.add, color: Colors.white),
       ),
       body: Column(
         children: [
@@ -112,9 +114,10 @@ class _StudentListViewState extends State<StudentListView> {
           final s = provider.students[index];
           return Card(
             elevation: 0,
+            color: AppColors.surface,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),
-              side: BorderSide(color: Colors.grey.shade200),
+              side: BorderSide(color: AppColors.fieldLine),
             ),
             child: ListTile(
               contentPadding:
@@ -319,7 +322,7 @@ class _StudentListViewState extends State<StudentListView> {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(
                                   content: Text('Siswa berhasil dibuat'),
-                                  backgroundColor: Colors.green,
+                                  backgroundColor: AppColors.success,
                                 ),
                               );
                             } else {
@@ -327,7 +330,7 @@ class _StudentListViewState extends State<StudentListView> {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
                                   content: Text(provider.errorMessage ?? 'Gagal membuat siswa'),
-                                  backgroundColor: Colors.red,
+                                  backgroundColor: AppColors.error,
                                 ),
                               );
                             }
@@ -373,7 +376,7 @@ class _StudentListViewState extends State<StudentListView> {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(
                                   content: Text('Siswa diperbarui'),
-                                  backgroundColor: Colors.green,
+                                  backgroundColor: AppColors.success,
                                 ),
                               );
                             } else {
@@ -381,7 +384,7 @@ class _StudentListViewState extends State<StudentListView> {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
                                   content: Text(provider.errorMessage ?? 'Gagal memperbarui siswa'),
-                                  backgroundColor: Colors.red,
+                                  backgroundColor: AppColors.error,
                                 ),
                               );
                             }

@@ -25,7 +25,7 @@ class _AnnouncementListViewState extends State<AnnouncementListView> {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.surface,
       shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(16))),
       builder: (_) => const _CreateAnnouncementSheet(),
     );
@@ -39,12 +39,14 @@ class _AnnouncementListViewState extends State<AnnouncementListView> {
       backgroundColor: AppColors.background,
       appBar: AppBar(
         title: const Text("Pengumuman"),
-        backgroundColor: AppColors.primary,
-        foregroundColor: Colors.white,
+        backgroundColor: AppColors.surface,
+        foregroundColor: AppColors.textPrimary,
+        elevation: 0,
+        surfaceTintColor: Colors.transparent,
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: _openCreateSheet,
-        backgroundColor: AppColors.primary,
+        backgroundColor: AppColors.accentGreen,
         child: const Icon(Icons.add, color: Colors.white),
       ),
       body: _buildBody(provider),
@@ -77,9 +79,10 @@ class _AnnouncementListViewState extends State<AnnouncementListView> {
           final a = provider.announcements[index];
           return Card(
             elevation: 0,
+            color: AppColors.surface,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),
-              side: BorderSide(color: Colors.grey.shade200),
+              side: BorderSide(color: AppColors.fieldLine),
             ),
             child: Padding(
               padding: const EdgeInsets.all(16),

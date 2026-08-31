@@ -31,14 +31,16 @@ class _ClassListViewState extends State<ClassListView> {
       backgroundColor: AppColors.background,
       appBar: AppBar(
         title: const Text("Daftar Kelas"),
-        backgroundColor: AppColors.primary,
-        foregroundColor: Colors.white,
+        backgroundColor: AppColors.surface,
+        foregroundColor: AppColors.textPrimary,
+        elevation: 0,
+        surfaceTintColor: Colors.transparent,
       ),
       body: _buildBody(provider),
       floatingActionButton: FloatingActionButton(
         onPressed: () => _openClassForm(context, provider: provider),
-        backgroundColor: AppColors.primary,
-        child: const Icon(Icons.add),
+        backgroundColor: AppColors.accentGreen,
+        child: const Icon(Icons.add, color: Colors.white),
       ),
     );
   }
@@ -71,21 +73,22 @@ class _ClassListViewState extends State<ClassListView> {
           final c = provider.classes[index];
           return Card(
             elevation: 0,
+            color: AppColors.surface,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),
-              side: BorderSide(color: Colors.grey.shade200),
+              side: BorderSide(color: AppColors.fieldLine),
             ),
             child: ListTile(
               contentPadding:
                   const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               leading: CircleAvatar(
-                backgroundColor: AppColors.primary.withOpacity(0.1),
+                backgroundColor: AppColors.accentGreen.withOpacity(0.12),
                 child: Text(
                   c.className,
                   style: const TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.bold,
-                      color: AppColors.primary),
+                      color: AppColors.accentGreen),
                 ),
               ),
               title: Text(

@@ -60,8 +60,10 @@ class _AcademicYearListViewState extends State<AcademicYearListView> {
       backgroundColor: AppColors.background,
       appBar: AppBar(
         title: const Text("Tahun Ajaran"),
-        backgroundColor: AppColors.primary,
-        foregroundColor: Colors.white,
+        backgroundColor: AppColors.surface,
+        foregroundColor: AppColors.textPrimary,
+        elevation: 0,
+        surfaceTintColor: Colors.transparent,
       ),
       body: _buildBody(provider),
     );
@@ -93,9 +95,10 @@ class _AcademicYearListViewState extends State<AcademicYearListView> {
           final y = provider.years[index];
           return Card(
             elevation: 0,
+            color: AppColors.surface,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),
-              side: BorderSide(color: y.isActive ? AppColors.success : Colors.grey.shade200, width: y.isActive ? 1.5 : 1),
+              side: BorderSide(color: y.isActive ? AppColors.success : AppColors.fieldLine, width: y.isActive ? 1.5 : 1),
             ),
             child: ListTile(
               contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
