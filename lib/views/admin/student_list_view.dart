@@ -6,6 +6,8 @@ import '../../providers/class_provider.dart';
 import '../../data/models/student_model.dart';
 import '../../data/models/school_class_model.dart';
 import '../widgets/loading_indicator.dart';
+import '../widgets/admin_stat_header.dart';
+import '../widgets/admin_empty_state.dart';
 
 class StudentListView extends StatefulWidget {
   const StudentListView({super.key});
@@ -76,6 +78,17 @@ class _StudentListViewState extends State<StudentListView> {
               onChanged: _onClassFilterChanged,
             ),
           ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+            child: AdminStatHeader(
+              icon: Icons.people_outline,
+              color: AppColors.accentGreenDark,
+              value: studentProvider.students.length.toString(),
+              label: _selectedClassId == null
+                  ? "Total siswa"
+                  : "Siswa di kelas ini",
+            ),
+          ),
           Expanded(child: _buildBody(studentProvider)),
         ],
       ),
@@ -98,9 +111,15 @@ class _StudentListViewState extends State<StudentListView> {
     }
 
     if (provider.students.isEmpty) {
-      return const Center(
-          child: Text("Belum ada siswa",
-              style: TextStyle(color: AppColors.textSecondary)));
+      return AdminEmptyState(
+        icon: Icons.people_outline,
+        color: AppColors.accentGreenDark,
+        message: _selectedClassId == null
+            ? "Belum ada siswa terdaftar"
+            : "Belum ada siswa di kelas ini",
+        ctaLabel: "Tambah siswa",
+        onCta: () => _openStudentForm(context, provider: provider),
+      );
     }
 
     return RefreshIndicator(
@@ -240,7 +259,8 @@ class _StudentListViewState extends State<StudentListView> {
                   const SizedBox(height: 8),
                   TextFormField(
                       controller: nisnCtrl,
-                      decoration: const InputDecoration(labelText: 'NISN (opsional kelas 1)')),
+                      decoration: const InputDecoration(
+                          labelText: 'NISN (opsional kelas 1)')),
                   const SizedBox(height: 8),
                   TextFormField(
                       controller: phoneCtrl,
@@ -329,7 +349,8 @@ class _StudentListViewState extends State<StudentListView> {
                               // 🔴 KALAU GAGAL: JANGAN POP MODAL! Tampilkan snackbar error
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
-                                  content: Text(provider.errorMessage ?? 'Gagal membuat siswa'),
+                                  content: Text(provider.errorMessage ??
+                                      'Gagal membuat siswa'),
                                   backgroundColor: AppColors.error,
                                 ),
                               );
@@ -383,7 +404,8 @@ class _StudentListViewState extends State<StudentListView> {
                               // 🔴 KALAU GAGAL UPDATE: JANGAN POP MODAL! Tampilkan snackbar error
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
-                                  content: Text(provider.errorMessage ?? 'Gagal memperbarui siswa'),
+                                  content: Text(provider.errorMessage ??
+                                      'Gagal memperbarui siswa'),
                                   backgroundColor: AppColors.error,
                                 ),
                               );

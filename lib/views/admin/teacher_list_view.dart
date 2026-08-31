@@ -4,6 +4,9 @@ import '../../core/constants/app_colors.dart';
 import '../../providers/teacher_provider.dart';
 import '../../data/models/teacher_model.dart';
 import '../widgets/loading_indicator.dart';
+import '../widgets/admin_stat_header.dart';
+import '../widgets/admin_empty_state.dart';
+import '../widgets/admin_badge.dart';
 import 'class_subject_list_view.dart';
 
 class TeacherListView extends StatefulWidget {
@@ -56,90 +59,125 @@ class _TeacherListViewState extends State<TeacherListView> {
     }
 
     if (provider.teachers.isEmpty) {
-      return const Center(
-          child: Text("Belum ada guru",
-              style: TextStyle(color: AppColors.textMuted)));
+      return AdminEmptyState(
+        icon: Icons.person_outline,
+        color: const Color(0xFFF5A623),
+        message: "Belum ada guru terdaftar",
+        ctaLabel: "Tambah guru",
+        onCta: () => _openTeacherForm(context, provider: provider),
+      );
     }
 
     return RefreshIndicator(
       onRefresh: () => context.read<TeacherProvider>().fetchAll(),
       child: ListView.separated(
-        padding: const EdgeInsets.all(16),
-        itemCount: provider.teachers.length,
+        padding: const EdgeInsets.fromLTRB(0, 0, 0, 16),
+        itemCount: provider.teachers.length + 1,
         separatorBuilder: (_, __) => const SizedBox(height: 8),
         itemBuilder: (context, index) {
-          final t = provider.teachers[index];
-          return Card(
-            elevation: 0,
-            color: AppColors.surface,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-              side: BorderSide(color: AppColors.fieldLine),
-            ),
-            child: ListTile(
-              contentPadding:
-                  const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              leading: CircleAvatar(
-                backgroundColor: const Color(0xFFF5A623).withOpacity(0.12),
-                child: const Icon(Icons.person_outline,
-                    size: 18, color: Color(0xFFF5A623)),
-              ),
-              title: Text(t.name,
-                  style: const TextStyle(
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.textPrimary)),
-              subtitle: Text(
-                "${t.teacherType == 'homeroom' ? 'Wali Kelas' : 'Guru Mapel'}"
-                "${t.nip != null && t.nip!.isNotEmpty ? ' • NIP: ${t.nip}' : ''}"
-                "${t.phoneNumber != null && t.phoneNumber!.isNotEmpty ? ' • ${t.phoneNumber}' : ''}",
-                style: const TextStyle(
-                    fontSize: 12, color: AppColors.textSecondary),
-              ),
-              trailing: PopupMenuButton<String>(
-                onSelected: (v) async {
-                  if (v == 'assign') {
-                    Navigator.of(context).push(MaterialPageRoute(
-                      builder: (_) => ClassSubjectListView(
-                          filterTeacherId: t.id, filterTeacherName: t.name),
-                    ));
-                  } else if (v == 'edit') {
-                    _openTeacherForm(context, provider: provider, existing: t);
-                  } else if (v == 'delete') {
-                    final confirmed = await showDialog<bool>(
-                      context: context,
-                      builder: (_) => AlertDialog(
-                        title: const Text('Konfirmasi'),
-                        content: const Text('Yakin ingin menghapus guru ini?'),
-                        actions: [
-                          TextButton(
-                              onPressed: () => Navigator.pop(context, false),
-                              child: const Text('Batal')),
-                          TextButton(
-                              onPressed: () => Navigator.pop(context, true),
-                              child: const Text('Hapus')),
-                        ],
-                      ),
-                    );
-                    if (confirmed == true) {
-                      final ok = await provider.remove(t.id);
-                      if (!context.mounted) return;
-                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                        content: Text(ok
-                            ? 'Guru dihapus'
-                            : (provider.errorMessage ?? 'Gagal menghapus')),
-                      ));
-                    }
-                  }
-                },
-                itemBuilder: (_) => const [
-                  PopupMenuItem(
-                      value: 'assign', child: Text('Kelola Penugasan')),
-                  PopupMenuItem(value: 'edit', child: Text('Edit')),
-                  PopupMenuItem(value: 'delete', child: Text('Hapus')),
-                ],
-              ),
-            ),
-          );
+          if (index == 0) {
+            return AdminStatHeader(
+              icon: Icons.person_outline,
+              color: const Color(0xFFF5A623),
+              value: provider.teachers.length.toString(),
+              label: "Guru terdaftar",
+            );
+          }
+          final t = provider.teachers[index - 1];
+          return Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Card(
+                elevation: 0,
+                color: AppColors.surface,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  side: BorderSide(color: AppColors.fieldLine),
+                ),
+                child: ListTile(
+                  contentPadding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  leading: CircleAvatar(
+                    backgroundColor: const Color(0xFFF5A623).withOpacity(0.12),
+                    child: const Icon(Icons.person_outline,
+                        size: 18, color: Color(0xFFF5A623)),
+                  ),
+                  title: Text(t.name,
+                      style: const TextStyle(
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.textPrimary)),
+                  subtitle: Padding(
+                    padding: const EdgeInsets.only(top: 4),
+                    child: Row(
+                      children: [
+                        AdminBadge(
+                          label: t.teacherType == 'homeroom'
+                              ? 'Wali Kelas'
+                              : 'Guru Mapel',
+                          color: t.teacherType == 'homeroom'
+                              ? const Color(0xFF5B8DEF)
+                              : const Color(0xFFF5A623),
+                        ),
+                        const SizedBox(width: 6),
+                        Expanded(
+                          child: Text(
+                            "${t.nip != null && t.nip!.isNotEmpty ? 'NIP ${t.nip}' : ''}"
+                            "${t.phoneNumber != null && t.phoneNumber!.isNotEmpty ? ' • ${t.phoneNumber}' : ''}",
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                                fontSize: 12, color: AppColors.textSecondary),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  trailing: PopupMenuButton<String>(
+                    onSelected: (v) async {
+                      if (v == 'assign') {
+                        Navigator.of(context).push(MaterialPageRoute(
+                          builder: (_) => ClassSubjectListView(
+                              filterTeacherId: t.id, filterTeacherName: t.name),
+                        ));
+                      } else if (v == 'edit') {
+                        _openTeacherForm(context,
+                            provider: provider, existing: t);
+                      } else if (v == 'delete') {
+                        final confirmed = await showDialog<bool>(
+                          context: context,
+                          builder: (_) => AlertDialog(
+                            title: const Text('Konfirmasi'),
+                            content:
+                                const Text('Yakin ingin menghapus guru ini?'),
+                            actions: [
+                              TextButton(
+                                  onPressed: () =>
+                                      Navigator.pop(context, false),
+                                  child: const Text('Batal')),
+                              TextButton(
+                                  onPressed: () => Navigator.pop(context, true),
+                                  child: const Text('Hapus')),
+                            ],
+                          ),
+                        );
+                        if (confirmed == true) {
+                          final ok = await provider.remove(t.id);
+                          if (!context.mounted) return;
+                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                            content: Text(ok
+                                ? 'Guru dihapus'
+                                : (provider.errorMessage ?? 'Gagal menghapus')),
+                          ));
+                        }
+                      }
+                    },
+                    itemBuilder: (_) => const [
+                      PopupMenuItem(
+                          value: 'assign', child: Text('Kelola Penugasan')),
+                      PopupMenuItem(value: 'edit', child: Text('Edit')),
+                      PopupMenuItem(value: 'delete', child: Text('Hapus')),
+                    ],
+                  ),
+                ),
+              ));
         },
       ),
     );

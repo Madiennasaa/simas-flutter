@@ -5,6 +5,8 @@ import '../../providers/class_provider.dart';
 import '../../providers/teacher_provider.dart';
 import '../../data/models/school_class_model.dart';
 import '../widgets/loading_indicator.dart';
+import '../widgets/admin_stat_header.dart';
+import '../widgets/admin_empty_state.dart';
 
 class ClassListView extends StatefulWidget {
   const ClassListView({super.key});
@@ -58,88 +60,106 @@ class _ClassListViewState extends State<ClassListView> {
     }
 
     if (provider.classes.isEmpty) {
-      return const Center(
-          child: Text("Belum ada kelas",
-              style: TextStyle(color: AppColors.textSecondary)));
+      return AdminEmptyState(
+        icon: Icons.class_outlined,
+        color: AppColors.accentGreen,
+        message: "Belum ada kelas yang dibuat",
+        ctaLabel: "Tambah kelas",
+        onCta: () => _openClassForm(context, provider: provider),
+      );
     }
 
     return RefreshIndicator(
       onRefresh: () => context.read<ClassProvider>().fetchAll(),
       child: ListView.separated(
-        padding: const EdgeInsets.all(16),
-        itemCount: provider.classes.length,
+        padding: const EdgeInsets.fromLTRB(0, 0, 0, 16),
+        itemCount: provider.classes.length + 1,
         separatorBuilder: (_, __) => const SizedBox(height: 8),
         itemBuilder: (context, index) {
-          final c = provider.classes[index];
-          return Card(
-            elevation: 0,
-            color: AppColors.surface,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-              side: BorderSide(color: AppColors.fieldLine),
-            ),
-            child: ListTile(
-              contentPadding:
-                  const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              leading: CircleAvatar(
-                backgroundColor: AppColors.accentGreen.withOpacity(0.12),
-                child: Text(
-                  c.className,
-                  style: const TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.accentGreen),
+          if (index == 0) {
+            return AdminStatHeader(
+              icon: Icons.class_outlined,
+              color: AppColors.accentGreen,
+              value: provider.classes.length.toString(),
+              label: "Kelas terdaftar",
+            );
+          }
+          final c = provider.classes[index - 1];
+          return Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Card(
+                elevation: 0,
+                color: AppColors.surface,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  side: BorderSide(color: AppColors.fieldLine),
                 ),
-              ),
-              title: Text(
-                "Kelas ${c.className}",
-                style: const TextStyle(
-                    fontWeight: FontWeight.w600, color: AppColors.textPrimary),
-              ),
-              subtitle: Text(
-                "Tingkat ${c.gradeLevel} • ${c.studentCount} siswa"
-                "${c.homeroomTeacherName != null ? ' • Wali: ${c.homeroomTeacherName}' : ' • Belum ada wali kelas'}",
-                style: const TextStyle(
-                    fontSize: 12, color: AppColors.textSecondary),
-              ),
-              trailing: PopupMenuButton<String>(
-                onSelected: (v) async {
-                  if (v == 'edit') {
-                    _openClassForm(context, provider: provider, existing: c);
-                  } else if (v == 'delete') {
-                    final confirmed = await showDialog<bool>(
-                      context: context,
-                      builder: (_) => AlertDialog(
-                        title: const Text('Konfirmasi'),
-                        content: const Text('Yakin ingin menghapus kelas ini?'),
-                        actions: [
-                          TextButton(
-                              onPressed: () => Navigator.pop(context, false),
-                              child: const Text('Batal')),
-                          TextButton(
-                              onPressed: () => Navigator.pop(context, true),
-                              child: const Text('Hapus')),
-                        ],
-                      ),
-                    );
-                    if (confirmed == true) {
-                      final ok = await provider.remove(c.id);
-                      if (!context.mounted) return;
-                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                        content: Text(ok
-                            ? 'Kelas dihapus'
-                            : (provider.errorMessage ?? 'Gagal menghapus')),
-                      ));
-                    }
-                  }
-                },
-                itemBuilder: (_) => const [
-                  PopupMenuItem(value: 'edit', child: Text('Edit')),
-                  PopupMenuItem(value: 'delete', child: Text('Hapus')),
-                ],
-              ),
-            ),
-          );
+                child: ListTile(
+                  contentPadding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  leading: CircleAvatar(
+                    backgroundColor: AppColors.accentGreen.withOpacity(0.12),
+                    child: Text(
+                      c.className,
+                      style: const TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.accentGreen),
+                    ),
+                  ),
+                  title: Text(
+                    "Kelas ${c.className}",
+                    style: const TextStyle(
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.textPrimary),
+                  ),
+                  subtitle: Text(
+                    "Tingkat ${c.gradeLevel} • ${c.studentCount} siswa"
+                    "${c.homeroomTeacherName != null ? ' • Wali: ${c.homeroomTeacherName}' : ' • Belum ada wali kelas'}",
+                    style: const TextStyle(
+                        fontSize: 12, color: AppColors.textSecondary),
+                  ),
+                  trailing: PopupMenuButton<String>(
+                    onSelected: (v) async {
+                      if (v == 'edit') {
+                        _openClassForm(context,
+                            provider: provider, existing: c);
+                      } else if (v == 'delete') {
+                        final confirmed = await showDialog<bool>(
+                          context: context,
+                          builder: (_) => AlertDialog(
+                            title: const Text('Konfirmasi'),
+                            content:
+                                const Text('Yakin ingin menghapus kelas ini?'),
+                            actions: [
+                              TextButton(
+                                  onPressed: () =>
+                                      Navigator.pop(context, false),
+                                  child: const Text('Batal')),
+                              TextButton(
+                                  onPressed: () => Navigator.pop(context, true),
+                                  child: const Text('Hapus')),
+                            ],
+                          ),
+                        );
+                        if (confirmed == true) {
+                          final ok = await provider.remove(c.id);
+                          if (!context.mounted) return;
+                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                            content: Text(ok
+                                ? 'Kelas dihapus'
+                                : (provider.errorMessage ?? 'Gagal menghapus')),
+                          ));
+                        }
+                      }
+                    },
+                    itemBuilder: (_) => const [
+                      PopupMenuItem(value: 'edit', child: Text('Edit')),
+                      PopupMenuItem(value: 'delete', child: Text('Hapus')),
+                    ],
+                  ),
+                ),
+              ));
         },
       ),
     );

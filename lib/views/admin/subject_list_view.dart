@@ -4,6 +4,9 @@ import '../../core/constants/app_colors.dart';
 import '../../providers/subject_provider.dart';
 import '../../data/models/subject_model.dart';
 import '../widgets/loading_indicator.dart';
+import '../widgets/admin_stat_header.dart';
+import '../widgets/admin_empty_state.dart';
+import '../widgets/admin_badge.dart';
 
 class SubjectListView extends StatefulWidget {
   const SubjectListView({super.key});
@@ -55,81 +58,110 @@ class _SubjectListViewState extends State<SubjectListView> {
     }
 
     if (provider.subjects.isEmpty) {
-      return const Center(
-          child: Text("Belum ada mapel",
-              style: TextStyle(color: AppColors.textMuted)));
+      return AdminEmptyState(
+        icon: Icons.book_outlined,
+        color: AppColors.accentGreen,
+        message: "Belum ada mata pelajaran",
+        ctaLabel: "Tambah mapel",
+        onCta: () => _openSubjectForm(context, provider: provider),
+      );
     }
 
     return RefreshIndicator(
       onRefresh: () => context.read<SubjectProvider>().fetchAll(),
       child: ListView.separated(
-        padding: const EdgeInsets.all(16),
-        itemCount: provider.subjects.length,
+        padding: const EdgeInsets.fromLTRB(0, 0, 0, 16),
+        itemCount: provider.subjects.length + 1,
         separatorBuilder: (_, __) => const SizedBox(height: 8),
         itemBuilder: (context, index) {
-          final s = provider.subjects[index];
-          return Card(
-            elevation: 0,
-            color: AppColors.surface,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-              side: BorderSide(color: AppColors.fieldLine),
-            ),
-            child: ListTile(
-              contentPadding:
-                  const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              leading: CircleAvatar(
-                backgroundColor: AppColors.accentGreen.withOpacity(0.12),
-                child: const Icon(Icons.book_outlined,
-                    size: 18, color: AppColors.accentGreen),
-              ),
-              title: Text(s.subjectName,
-                  style: const TextStyle(
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.textPrimary)),
-              subtitle: Text(
-                "${s.type == 'mulok' ? 'Muatan Lokal' : 'Umum'} • KKM: ${s.kkm.toStringAsFixed(0)}",
-                style: const TextStyle(
-                    fontSize: 12, color: AppColors.textSecondary),
-              ),
-              trailing: PopupMenuButton<String>(
-                onSelected: (v) async {
-                  if (v == 'edit') {
-                    _openSubjectForm(context, provider: provider, existing: s);
-                  } else if (v == 'delete') {
-                    final confirmed = await showDialog<bool>(
-                      context: context,
-                      builder: (_) => AlertDialog(
-                        title: const Text('Konfirmasi'),
-                        content: const Text('Yakin ingin menghapus mapel ini?'),
-                        actions: [
-                          TextButton(
-                              onPressed: () => Navigator.pop(context, false),
-                              child: const Text('Batal')),
-                          TextButton(
-                              onPressed: () => Navigator.pop(context, true),
-                              child: const Text('Hapus')),
-                        ],
-                      ),
-                    );
-                    if (confirmed == true) {
-                      final ok = await provider.remove(s.id);
-                      if (!context.mounted) return;
-                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                        content: Text(ok
-                            ? 'Mapel dihapus'
-                            : (provider.errorMessage ?? 'Gagal menghapus')),
-                      ));
-                    }
-                  }
-                },
-                itemBuilder: (_) => const [
-                  PopupMenuItem(value: 'edit', child: Text('Edit')),
-                  PopupMenuItem(value: 'delete', child: Text('Hapus')),
-                ],
-              ),
-            ),
-          );
+          if (index == 0) {
+            return AdminStatHeader(
+              icon: Icons.book_outlined,
+              color: AppColors.accentGreen,
+              value: provider.subjects.length.toString(),
+              label: "Mata pelajaran",
+            );
+          }
+          final s = provider.subjects[index - 1];
+          return Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Card(
+                elevation: 0,
+                color: AppColors.surface,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  side: BorderSide(color: AppColors.fieldLine),
+                ),
+                child: ListTile(
+                  contentPadding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  leading: CircleAvatar(
+                    backgroundColor: AppColors.accentGreen.withOpacity(0.12),
+                    child: const Icon(Icons.book_outlined,
+                        size: 18, color: AppColors.accentGreen),
+                  ),
+                  title: Text(s.subjectName,
+                      style: const TextStyle(
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.textPrimary)),
+                  subtitle: Padding(
+                    padding: const EdgeInsets.only(top: 4),
+                    child: Row(
+                      children: [
+                        AdminBadge(
+                          label: s.type == 'mulok' ? 'Muatan Lokal' : 'Umum',
+                          color: s.type == 'mulok'
+                              ? const Color(0xFFA78BFA)
+                              : AppColors.accentGreen,
+                        ),
+                        const SizedBox(width: 6),
+                        Text("KKM ${s.kkm.toStringAsFixed(0)}",
+                            style: const TextStyle(
+                                fontSize: 12, color: AppColors.textSecondary)),
+                      ],
+                    ),
+                  ),
+                  trailing: PopupMenuButton<String>(
+                    onSelected: (v) async {
+                      if (v == 'edit') {
+                        _openSubjectForm(context,
+                            provider: provider, existing: s);
+                      } else if (v == 'delete') {
+                        final confirmed = await showDialog<bool>(
+                          context: context,
+                          builder: (_) => AlertDialog(
+                            title: const Text('Konfirmasi'),
+                            content:
+                                const Text('Yakin ingin menghapus mapel ini?'),
+                            actions: [
+                              TextButton(
+                                  onPressed: () =>
+                                      Navigator.pop(context, false),
+                                  child: const Text('Batal')),
+                              TextButton(
+                                  onPressed: () => Navigator.pop(context, true),
+                                  child: const Text('Hapus')),
+                            ],
+                          ),
+                        );
+                        if (confirmed == true) {
+                          final ok = await provider.remove(s.id);
+                          if (!context.mounted) return;
+                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                            content: Text(ok
+                                ? 'Mapel dihapus'
+                                : (provider.errorMessage ?? 'Gagal menghapus')),
+                          ));
+                        }
+                      }
+                    },
+                    itemBuilder: (_) => const [
+                      PopupMenuItem(value: 'edit', child: Text('Edit')),
+                      PopupMenuItem(value: 'delete', child: Text('Hapus')),
+                    ],
+                  ),
+                ),
+              ));
         },
       ),
     );

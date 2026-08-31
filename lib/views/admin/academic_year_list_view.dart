@@ -3,6 +3,9 @@ import 'package:provider/provider.dart';
 import '../../core/constants/app_colors.dart';
 import '../../providers/academic_year_provider.dart';
 import '../widgets/loading_indicator.dart';
+import '../widgets/admin_stat_header.dart';
+import '../widgets/admin_empty_state.dart';
+import '../widgets/admin_badge.dart';
 
 class AcademicYearListView extends StatefulWidget {
   const AcademicYearListView({super.key});
@@ -30,8 +33,12 @@ class _AcademicYearListViewState extends State<AcademicYearListView> {
           "(gak bisa diedit lagi kecuali dibuka manual). Yakin?",
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text("Batal")),
-          FilledButton(onPressed: () => Navigator.pop(ctx, true), child: const Text("Ya, Aktifkan")),
+          TextButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              child: const Text("Batal")),
+          FilledButton(
+              onPressed: () => Navigator.pop(ctx, true),
+              child: const Text("Ya, Aktifkan")),
         ],
       ),
     );
@@ -41,12 +48,16 @@ class _AcademicYearListViewState extends State<AcademicYearListView> {
       if (!mounted) return;
       if (success) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Semester aktif berhasil diganti"), backgroundColor: AppColors.success),
+          const SnackBar(
+              content: Text("Semester aktif berhasil diganti"),
+              backgroundColor: AppColors.success),
         );
       } else {
         final error = context.read<AcademicYearProvider>().errorMessage;
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(error ?? "Gagal mengganti semester"), backgroundColor: AppColors.error),
+          SnackBar(
+              content: Text(error ?? "Gagal mengganti semester"),
+              backgroundColor: AppColors.error),
         );
       }
     }
@@ -70,76 +81,91 @@ class _AcademicYearListViewState extends State<AcademicYearListView> {
   }
 
   Widget _buildBody(AcademicYearProvider provider) {
-    if (provider.isLoading && provider.years.isEmpty) return const LoadingIndicator();
+    if (provider.isLoading && provider.years.isEmpty)
+      return const LoadingIndicator();
 
     if (provider.errorMessage != null && provider.years.isEmpty) {
       return Center(
         child: Padding(
           padding: const EdgeInsets.all(24),
-          child: Text(provider.errorMessage!, style: const TextStyle(color: AppColors.error)),
+          child: Text(provider.errorMessage!,
+              style: const TextStyle(color: AppColors.error)),
         ),
       );
     }
 
     if (provider.years.isEmpty) {
-      return const Center(child: Text("Belum ada tahun ajaran", style: TextStyle(color: AppColors.textSecondary)));
+      return const AdminEmptyState(
+        icon: Icons.calendar_today_outlined,
+        color: Color(0xFFA78BFA),
+        message: "Belum ada tahun ajaran",
+      );
     }
+
+    final activeCount = provider.years.where((y) => y.isActive).length;
 
     return RefreshIndicator(
       onRefresh: () => context.read<AcademicYearProvider>().fetchAll(),
       child: ListView.separated(
-        padding: const EdgeInsets.all(16),
-        itemCount: provider.years.length,
+        padding: const EdgeInsets.fromLTRB(0, 0, 0, 16),
+        itemCount: provider.years.length + 1,
         separatorBuilder: (_, __) => const SizedBox(height: 8),
         itemBuilder: (context, index) {
-          final y = provider.years[index];
-          return Card(
-            elevation: 0,
-            color: AppColors.surface,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-              side: BorderSide(color: y.isActive ? AppColors.success : AppColors.fieldLine, width: y.isActive ? 1.5 : 1),
-            ),
-            child: ListTile(
-              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              title: Text(y.label, style: const TextStyle(fontWeight: FontWeight.w600, color: AppColors.textPrimary)),
-              subtitle: Row(
-                children: [
-                  if (y.isActive)
-                    _Badge(label: "Aktif", color: AppColors.success)
-                  else if (y.isLocked)
-                    _Badge(label: "Terkunci", color: AppColors.textSecondary)
-                  else
-                    _Badge(label: "Belum aktif", color: AppColors.warning),
-                ],
-              ),
-              trailing: y.isActive
-                  ? null
-                  : TextButton(
-                      onPressed: () => _confirmSetActive(y.id, y.label),
-                      child: const Text("Aktifkan"),
+          if (index == 0) {
+            return AdminStatHeader(
+              icon: Icons.calendar_today_outlined,
+              color: const Color(0xFFA78BFA),
+              value: provider.years.length.toString(),
+              label:
+                  activeCount > 0 ? "Tahun ajaran (1 aktif)" : "Tahun ajaran",
+            );
+          }
+          final y = provider.years[index - 1];
+          return Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Card(
+                elevation: 0,
+                color: AppColors.surface,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  side: BorderSide(
+                      color:
+                          y.isActive ? AppColors.success : AppColors.fieldLine,
+                      width: y.isActive ? 1.5 : 1),
+                ),
+                child: ListTile(
+                  contentPadding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  title: Text(y.label,
+                      style: const TextStyle(
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.textPrimary)),
+                  subtitle: Padding(
+                    padding: const EdgeInsets.only(top: 4),
+                    child: Row(
+                      children: [
+                        if (y.isActive)
+                          const AdminBadge(
+                              label: "Aktif", color: AppColors.success)
+                        else if (y.isLocked)
+                          const AdminBadge(
+                              label: "Terkunci", color: AppColors.textSecondary)
+                        else
+                          const AdminBadge(
+                              label: "Belum aktif", color: AppColors.warning),
+                      ],
                     ),
-            ),
-          );
+                  ),
+                  trailing: y.isActive
+                      ? null
+                      : TextButton(
+                          onPressed: () => _confirmSetActive(y.id, y.label),
+                          child: const Text("Aktifkan"),
+                        ),
+                ),
+              ));
         },
       ),
-    );
-  }
-}
-
-class _Badge extends StatelessWidget {
-  final String label;
-  final Color color;
-
-  const _Badge({required this.label, required this.color});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.only(top: 4),
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-      decoration: BoxDecoration(color: color.withOpacity(0.12), borderRadius: BorderRadius.circular(6)),
-      child: Text(label, style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: color)),
     );
   }
 }
