@@ -5,7 +5,8 @@ class UserModel {
   final int id;
   final String username;
   final String name;
-  final String role; // 'admin' | 'teacher' | 'student' | 'parent' | 'headmaster'
+  final String
+      role; // 'admin' | 'teacher' | 'student' | 'parent' | 'headmaster'
   final String? phoneNumber;
 
   // Diambil dari JWT payload (lihat authService.js backend), bukan dari body /auth/me.
@@ -13,6 +14,16 @@ class UserModel {
   final int? studentId;
   final int? teacherId;
   final int? parentId;
+
+  // Khusus role student: kelas dia sendiri, dipakai buat filter jadwal,
+  // materi, tugas, dan absensi tanpa perlu lookup /students (yang tidak
+  // bisa diakses siswa).
+  final int? classId;
+  final String? className;
+
+  // Khusus role parent: daftar anak (id siswa + kelasnya), dipakai buat
+  // pilih anak mana yang mau dilihat datanya.
+  final List<ParentChild>? children;
 
   UserModel({
     required this.id,
@@ -23,6 +34,9 @@ class UserModel {
     this.studentId,
     this.teacherId,
     this.parentId,
+    this.classId,
+    this.className,
+    this.children,
   });
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
@@ -37,6 +51,11 @@ class UserModel {
       studentId: json["studentId"],
       teacherId: json["teacherId"],
       parentId: json["parentId"],
+      classId: json["classId"],
+      className: json["className"],
+      children: (json["children"] as List?)
+          ?.map((c) => ParentChild.fromJson(c))
+          .toList(),
     );
   }
 
@@ -45,4 +64,15 @@ class UserModel {
   bool get isStudent => role == "student";
   bool get isParent => role == "parent";
   bool get isHeadmaster => role == "headmaster";
+}
+
+class ParentChild {
+  final int id;
+  final int classId;
+
+  ParentChild({required this.id, required this.classId});
+
+  factory ParentChild.fromJson(Map<String, dynamic> json) {
+    return ParentChild(id: json["id"], classId: json["classId"]);
+  }
 }
