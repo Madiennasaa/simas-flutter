@@ -27,6 +27,13 @@ dev_dependencies:
     sdk: flutter
   flutter_lints: ^4.0.0
 
+flutter_launcher_icons:
+  android: true
+  ios: false
+  image_path: "assets/images/tutwuri.png"
+  adaptive_icon_background: "#F6F7F9"
+  adaptive_icon_foreground: "assets/images/tutwuri.png"
+
 flutter:
   uses-material-design: true
   assets:
