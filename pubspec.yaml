@@ -20,6 +20,8 @@ dependencies:
   # Simpan token JWT dengan aman (bukan shared_preferences biasa)
   flutter_secure_storage: ^9.2.2
 
+  url_launcher: ^6.3.0
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
