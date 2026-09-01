@@ -69,10 +69,18 @@ class UserModel {
 class ParentChild {
   final int id;
   final int classId;
+  final String? name;
+  final String? className;
 
-  ParentChild({required this.id, required this.classId});
+  ParentChild(
+      {required this.id, required this.classId, this.name, this.className});
 
   factory ParentChild.fromJson(Map<String, dynamic> json) {
-    return ParentChild(id: json["id"], classId: json["classId"]);
+    return ParentChild(
+      id: json["id"],
+      classId: json["classId"],
+      name: json["name"],
+      className: json["className"],
+    );
   }
 }
