@@ -4,4 +4,10 @@
          to allow setting breakpoints, to provide hot reload, etc.
     -->
     <uses-permission android:name="android.permission.INTERNET"/>
+
+    <!-- Izinkan HTTP polos (cleartext) buat akses backend lokal via
+         http://localhost saat develop (adb reverse tcp:3000 tcp:3000).
+         Android 9+ blokir ini secara default kalau tidak diizinkan begini.
+         Cuma berlaku di build debug, tidak kebawa ke staging/production. -->
+    <application android:usesCleartextTraffic="true" />
 </manifest>
